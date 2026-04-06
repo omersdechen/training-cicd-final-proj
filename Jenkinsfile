@@ -89,7 +89,7 @@ pipeline {
 
                 stage('Security Scan') {
                     when {
-                        not { params.SKIP_SECURITY }
+                        expression { return !params.SKIP_SECURITY }
                     }
                     steps {
                         echo "🛡️ Running security scan..."
@@ -104,7 +104,7 @@ pipeline {
 
         stage('Testing Suite') {
             when {
-                not { params.SKIP_TESTS }
+                expression { return !params.SKIP_TESTS }
             }
             parallel {
                 stage('Unit Tests') {
