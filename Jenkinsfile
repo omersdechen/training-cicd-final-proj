@@ -78,6 +78,7 @@ pipeline {
                     }
                     steps {
                         echo "📦 Installing dependencies..."
+                        sh 'rm -rf node_modules'
                         sh 'npm ci --cache /tmp/.npm'
 
                         echo "🔍 Running linter..."
@@ -122,6 +123,7 @@ pipeline {
                         }
                     }
                     steps {
+                        sh 'rm -rf node_modules'
                         sh 'npm ci --cache /tmp/.npm'
                         sh 'npm run test:unit'
                     }
