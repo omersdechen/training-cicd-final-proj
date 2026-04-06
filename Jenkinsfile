@@ -73,11 +73,12 @@ pipeline {
                     agent {
                         docker {
                             image 'node:18-alpine'
+                            reuseNode true
                         }
                     }
                     steps {
                         echo "📦 Installing dependencies..."
-                        sh 'npm ci'
+                        sh 'npm ci --cache /tmp/.npm'
 
                         echo "🔍 Running linter..."
                         sh 'npm run lint'
@@ -88,6 +89,12 @@ pipeline {
                 }
 
                 stage('Security Scan') {
+                    agent {
+                        docker {
+                            image 'node:18-alpine'
+                            reuseNode true
+                        }
+                    }
                     when {
                         expression { return !params.SKIP_SECURITY }
                     }
@@ -111,10 +118,11 @@ pipeline {
                     agent {
                         docker {
                             image 'node:18-alpine'
+                            reuseNode true
                         }
                     }
                     steps {
-                        sh 'npm ci'
+                        sh 'npm ci --cache /tmp/.npm'
                         sh 'npm run test:unit'
                     }
                 }
@@ -123,10 +131,11 @@ pipeline {
                     agent {
                         docker {
                             image 'node:18-alpine'
+                            reuseNode true
                         }
                     }
                     steps {
-                        sh 'npm ci'
+                        sh 'npm ci --cache /tmp/.npm'
                         retry(2) {
                             sh 'npm run test:integration'
                         }
@@ -134,6 +143,12 @@ pipeline {
                 }
 
                 stage('E2E Tests') {
+                    agent {
+                        docker {
+                            image 'node:18-alpine'
+                            reuseNode true
+                        }
+                    }
                     when {
                         anyOf {
                             branch 'main'
@@ -142,6 +157,7 @@ pipeline {
                     }
                     steps {
                         echo "🎭 Running E2E tests..."
+                        sh 'npm ci --cache /tmp/.npm'
                         sh 'npm run test:e2e'
                     }
                 }
@@ -412,6 +428,7 @@ def deployApplication(environment) {
 
     switch(environment) {
         case 'dev':
+            sh "docker rm -f ${env.APP_NAME}-dev || true"
             sh "docker run -d --name ${env.APP_NAME}-dev -p 3001:3000 ${env.DOCKER_IMAGE}"
             break
         case 'staging':
